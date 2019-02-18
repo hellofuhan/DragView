@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".demo.MainActivity">
+
+
+    <com.rotai.xz.draglibrary.DragViewGroup
+        android:id="@+id/dragViewGroup"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <Switch
+                android:id="@+id/switch1"
+                android:padding="15dp"
+                android:text="使用自定义浮标 "
+                android:layout_gravity="right"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <com.rotai.xz.dragviewtest.demo.MyTextView
+                    android:id="@+id/tv1"
+                    android:layout_width="0dp"
+                    android:layout_height="60dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:background="#FF0000"
+                    android:text="A组文本1"
+                    android:translationZ="10dp" />
+                <com.rotai.xz.dragviewtest.demo.MyTextView
+                    android:id="@+id/tv2"
+                    android:layout_width="0dp"
+                    android:layout_height="60dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:background="#00FF00"
+                    android:text="A组文本2"
+                    android:translationZ="10dp" />
+                <com.rotai.xz.dragviewtest.demo.MyTextView
+                    android:id="@+id/tv3"
+                    android:layout_width="0dp"
+                    android:layout_height="60dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:background="#0099FF"
+                    android:text="B组文本1"
+                    android:translationZ="10dp" />
+                <com.rotai.xz.dragviewtest.demo.MyTextView
+                    android:id="@+id/tv4"
+                    android:layout_width="0dp"
+                    android:layout_height="60dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:background="#FF00FF"
+                    android:text="B组文本2"
+                    android:translationZ="10dp" />
+
+            </LinearLayout>
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:background="#000"/>
+            <TextView
+                android:text="数据分组使用:\nA组'被拖拽组件'只能放入A组容器,\nB组'被拖拽组件'只能放入B组容器"
+                android:gravity="center"
+                android:layout_width="match_parent"
+                android:layout_height="200dp" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:background="#000"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <include
+                    android:id="@+id/groupA"
+                    layout="@layout/demo_group"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1" />
+
+                <View
+                    android:layout_width="2dp"
+                    android:layout_height="match_parent"
+                    android:background="#000"/>
+
+                <include
+                    android:id="@+id/groupB"
+                    layout="@layout/demo_group"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1" />
+
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:background="#000"/>
+        </LinearLayout>
+
+    </com.rotai.xz.draglibrary.DragViewGroup>
+
+</FrameLayout>

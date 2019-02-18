@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 圆环-径向渐变渐变 -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="ring"
+    android:innerRadius="50dp"
+    android:thickness="30dp"
+    android:useLevel="false">
+    <!--android:useLevel="false"必须是false-->
+
+    <size
+        android:width="140dp"
+        android:height="140dp" />
+
+    <!--设置径向渐变半径，渐变从圆心开始-->
+    <gradient
+        android:centerX="0.5"
+        android:centerY="0.5"
+        android:centerColor="#80ff0000"
+        android:endColor="#00ff0000"
+        android:startColor="#ffff0000"
+        android:gradientRadius="70dp"
+        android:type="radial" />
+
+</shape>
