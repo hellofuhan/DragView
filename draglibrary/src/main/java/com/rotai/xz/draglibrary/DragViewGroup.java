@@ -23,7 +23,7 @@ import java.util.Map;
 public class DragViewGroup extends FrameLayout {
 
     private static float LONG_TOUCH_LENGTH;
-    private static Class< ? extends  BuoyIF> buoyIFClass = DView.class;
+    private static Class<? extends BuoyIF> buoyIFClass = DView.class;
     private static final long LONG_TOUCH_TIME = 250;
     private static final String TAG = "DragViewGroup";
     private Handler handler = new Handler();
@@ -46,7 +46,7 @@ public class DragViewGroup extends FrameLayout {
         LONG_TOUCH_LENGTH = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 25, context.getResources().getDisplayMetrics());
     }
 
-    public void setBuoyIFClass(Class< ? extends  BuoyIF> buoyIFClass ){
+    public void setBuoyIFClass(Class<? extends BuoyIF> buoyIFClass) {
         if (buoyIFClass == null)
             buoyIFClass = DView.class;
         this.buoyIFClass = buoyIFClass;
@@ -72,14 +72,12 @@ public class DragViewGroup extends FrameLayout {
 
     @Override
     public boolean dispatchTouchEvent(final MotionEvent ev) {
-        if (disallowIntercept) {
-            stopDragView(ev.getPointerId(ev.getActionIndex()), true);
-            return super.dispatchTouchEvent(ev);
-        }
+
         int action = ev.getActionMasked();
         Log.w(TAG, "dispatchTouchEvent: " + ev.getActionIndex());
         switch (action) {
             case MotionEvent.ACTION_DOWN:
+                disallowIntercept = false;
             case MotionEvent.ACTION_POINTER_DOWN:
                 Log.w(TAG, "dispatchTouchEvent: ACTION_DOWN  " + ev.getActionIndex());
                 int pointerId = ev.getPointerId(ev.getActionIndex());
@@ -100,7 +98,12 @@ public class DragViewGroup extends FrameLayout {
                 Runnable runnable = new Runnable() {
                     @Override
                     public void run() {
-                        onMove(buoyHolder);
+                        boolean b = onMove(buoyHolder);
+                        if (b){
+                            Log.e(TAG, "dispatchTouchEvent: handler下发cancel");
+                            ev.setAction(MotionEvent.ACTION_CANCEL);
+                            DragViewGroup.super.dispatchTouchEvent(ev);
+                        }
                     }
                 };
                 buoyHolder.runnable = runnable;
@@ -108,8 +111,12 @@ public class DragViewGroup extends FrameLayout {
                 break;
             case MotionEvent.ACTION_MOVE:
 //                Log.w(TAG, "dispatchTouchEvent: ACTION_MOVE  " + ev.getActionIndex());
+                if (disallowIntercept) {
+                    return super.dispatchTouchEvent(ev);
+                }
                 ArrayList<BuoyHolder> list = new ArrayList<>();
                 synchronized (holderMap) {
+                    Log.e(TAG, "dispatchTouchEvent: holderMap。size = "+holderMap.size() );
                     Iterator<Map.Entry<Integer, BuoyHolder>> iterator = holderMap.entrySet().iterator();
                     while (iterator.hasNext()) {
                         Map.Entry<Integer, BuoyHolder> next = iterator.next();
@@ -122,17 +129,26 @@ public class DragViewGroup extends FrameLayout {
                 }
                 for (BuoyHolder holder : list) {
                     if (onMove(holder)) {
+                        //Log.e(TAG, "dispatchTouchEvent: 下发cancel");
                         ev.setAction(MotionEvent.ACTION_CANCEL);
+                    //}else{
+                    //    Log.e(TAG, "dispatchTouchEvent: onMove false"+holder );
                     }
                 }
                 break;
             case MotionEvent.ACTION_CANCEL:
                 Log.w(TAG, "dispatchTouchEvent: ACTION_CANCEL  " + ev.getActionIndex());
-                stopDragView(ev.getPointerId(ev.getActionIndex()),true);
+                if (disallowIntercept) {
+                    return super.dispatchTouchEvent(ev);
+                }
+                stopDragView(ev.getPointerId(ev.getActionIndex()), true);
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_POINTER_UP:
                 Log.w(TAG, "dispatchTouchEvent: ACTION_UP  " + ev.getActionIndex());
+                if (disallowIntercept) {
+                    return super.dispatchTouchEvent(ev);
+                }
                 stopDragView(ev.getPointerId(ev.getActionIndex()), false);
                 break;
         }
@@ -141,7 +157,7 @@ public class DragViewGroup extends FrameLayout {
     }
 
     private boolean onMove(BuoyHolder buoyHolder) {
-        if (buoyHolder!=null) {
+        if (buoyHolder != null) {
             if (!buoyHolder.draging) {
                 if (Math.abs(buoyHolder.moveX - buoyHolder.downX) > LONG_TOUCH_LENGTH || Math.abs(buoyHolder.moveY - buoyHolder.downY) > LONG_TOUCH_LENGTH) {
                     buoyHolder.longTouchStart = false;
@@ -166,6 +182,15 @@ public class DragViewGroup extends FrameLayout {
 
     @Override
     public void requestDisallowInterceptTouchEvent(boolean disallowIntercept) {
+
+        if (holderMap.size()>0)return;
+
+
+                ArrayList<Integer> integers = new ArrayList<>(holderMap.keySet());
+                for (Integer integer : integers) {
+                    stopDragView(integer, true);
+                }
+
         this.disallowIntercept = disallowIntercept;
         super.requestDisallowInterceptTouchEvent(disallowIntercept);
     }
@@ -175,7 +200,7 @@ public class DragViewGroup extends FrameLayout {
         synchronized (holderMap) {
             buoyHolder = holderMap.remove(pointerId);
         }
-        if (buoyHolder!=null) {
+        if (buoyHolder != null) {
             handler.removeCallbacks(buoyHolder.runnable);
             buoyHolder.longTouchStart = false;
             if (buoyHolder.dragVew != null) {
@@ -196,14 +221,14 @@ public class DragViewGroup extends FrameLayout {
             }
 
             Iterator<Map.Entry<DragViewGroupIF, HashSet<DragViewIF>>> iterator = hoverMap.entrySet().iterator();
-            while (iterator.hasNext()){
+            while (iterator.hasNext()) {
                 Map.Entry<DragViewGroupIF, HashSet<DragViewIF>> next = iterator.next();
                 HashSet<DragViewIF> value = next.getValue();
-                if (value!=null){
+                if (value != null) {
                     Iterator<DragViewIF> iterator1 = value.iterator();
-                    while (iterator1.hasNext()){
+                    while (iterator1.hasNext()) {
                         DragViewIF next1 = iterator1.next();
-                        if (next1 == buoyHolder.dragVew){
+                        if (next1 == buoyHolder.dragVew) {
                             iterator1.remove();
                             next.getKey().onHover(value);
                             break;
@@ -218,6 +243,7 @@ public class DragViewGroup extends FrameLayout {
     }
 
     HashSet<DragViewIF> scanList = new HashSet<>();
+
     private void startDragView(BuoyHolder buoyHolder) {
         Log.w(TAG, "startDragView: ");
         buoyHolder.draging = true;
@@ -231,7 +257,7 @@ public class DragViewGroup extends FrameLayout {
                 buoyHolder.dView = buoyIF;
             } catch (Exception e) {
                 e.printStackTrace();
-                throw  new RuntimeException("创建BuoyIF失败");
+                throw new RuntimeException("创建BuoyIF失败");
             }
 
             buoyHolder.dView.setDragViewIF(buoyHolder.dragVew);
@@ -257,7 +283,8 @@ public class DragViewGroup extends FrameLayout {
     }
 
 
-    HashMap<DragViewGroupIF,HashSet<DragViewIF>> hoverMap = new HashMap<>();
+    HashMap<DragViewGroupIF, HashSet<DragViewIF>> hoverMap = new HashMap<>();
+
     private void moveTo(BuoyHolder buoyHolder) {
         if (buoyHolder.dView != null) {
             buoyHolder.dView.moveTo(buoyHolder.downX, buoyHolder.downY, buoyHolder.offsetX, buoyHolder.offsetY);
@@ -265,18 +292,18 @@ public class DragViewGroup extends FrameLayout {
             DragViewGroupIF dragVewGroup = findDragVewGroup(this, buoyHolder.downX + buoyHolder.offsetX, buoyHolder.downY + buoyHolder.offsetY);
             if (buoyHolder.lastMoveDragViewGroup != null && buoyHolder.lastMoveDragViewGroup != dragVewGroup) {
                 HashSet<DragViewIF> dragViewIFS = hoverMap.get(buoyHolder.lastMoveDragViewGroup);
-                if(dragViewIFS==null){
+                if (dragViewIFS == null) {
                     dragViewIFS = new HashSet<>();
-                    hoverMap.put(buoyHolder.lastMoveDragViewGroup,dragViewIFS);
+                    hoverMap.put(buoyHolder.lastMoveDragViewGroup, dragViewIFS);
                 }
                 dragViewIFS.remove(buoyHolder.dragVew);
                 buoyHolder.lastMoveDragViewGroup.onHover(dragViewIFS);
             }
             if (dragVewGroup != null) {
                 HashSet<DragViewIF> dragViewIFS = hoverMap.get(dragVewGroup);
-                if(dragViewIFS==null){
+                if (dragViewIFS == null) {
                     dragViewIFS = new HashSet<>();
-                    hoverMap.put(dragVewGroup,dragViewIFS);
+                    hoverMap.put(dragVewGroup, dragViewIFS);
                 }
                 dragViewIFS.add(buoyHolder.dragVew);
                 dragVewGroup.onHover(dragViewIFS);
@@ -296,7 +323,7 @@ public class DragViewGroup extends FrameLayout {
             int bottom = childAt.getBottom();
             if (left <= x && right >= x && top <= y && bottom >= y) {
                 if (childAt instanceof ViewGroup) {
-                    dragVew = findDragVew((ViewGroup) childAt, x-left, y-top);
+                    dragVew = findDragVew((ViewGroup) childAt, x - left, y - top);
                 }
                 if (dragVew == null) {
                     if (childAt instanceof DragViewIF) {
@@ -305,8 +332,6 @@ public class DragViewGroup extends FrameLayout {
                         break;
 //                        }
                     }
-                }else{
-                    return dragVew;
                 }
 
             }
@@ -325,7 +350,7 @@ public class DragViewGroup extends FrameLayout {
             int bottom = childAt.getBottom();
             if (left <= x && right >= x && top <= y && bottom >= y) {
                 if (childAt instanceof ViewGroup) {
-                    dragVew = findDragVewGroup((ViewGroup) childAt, x-left, y-top);
+                    dragVew = findDragVewGroup((ViewGroup) childAt, x - left, y - top);
                 }
                 if (dragVew == null) {
                     if (childAt instanceof DragViewGroupIF) {
@@ -334,8 +359,6 @@ public class DragViewGroup extends FrameLayout {
                         break;
 //                        }
                     }
-                }else{
-                    return dragVew;
                 }
 
             }
@@ -344,29 +367,29 @@ public class DragViewGroup extends FrameLayout {
     }
 
     private ArrayList<DragViewGroupIF> findAllDragVewGroup(ViewGroup viewGroup) {
-        ArrayList<DragViewGroupIF> dragVews = new ArrayList<>();
+        ArrayList<DragViewGroupIF> dragViews = new ArrayList<>();
         int childCount = viewGroup.getChildCount();
         for (int i = childCount - 1; i >= 0; i--) {
             View childAt = viewGroup.getChildAt(i);
 
             if (childAt instanceof ViewGroup) {
-                dragVews.addAll(findAllDragVewGroup((ViewGroup) childAt));
+                dragViews.addAll(findAllDragVewGroup((ViewGroup) childAt));
             }
             if (childAt instanceof DragViewGroupIF) {
-                dragVews.add((DragViewGroupIF) childAt);
+                dragViews.add((DragViewGroupIF) childAt);
             }
 
         }
-        return dragVews;
+        return dragViews;
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         boolean longTouchStart = false;
-        synchronized (holderMap){
+        synchronized (holderMap) {
             Iterator<BuoyHolder> iterator = holderMap.values().iterator();
-            while (iterator.hasNext()){
-                if(iterator.next().longTouchStart){
+            while (iterator.hasNext()) {
+                if (iterator.next().longTouchStart) {
                     longTouchStart = true;
                     break;
                 }
