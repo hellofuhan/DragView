@@ -332,6 +332,8 @@ public class DragViewGroup extends FrameLayout {
                         break;
 //                        }
                     }
+                }else{
+                    return dragVew;
                 }
 
             }
@@ -359,6 +361,8 @@ public class DragViewGroup extends FrameLayout {
                         break;
 //                        }
                     }
+                }else{
+                    return dragVew;
                 }
 
             }
