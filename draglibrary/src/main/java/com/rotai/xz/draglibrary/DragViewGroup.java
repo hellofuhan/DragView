@@ -166,8 +166,7 @@ public class DragViewGroup extends FrameLayout {
                 if (buoyHolder.longTouchStart) {
                     if (System.currentTimeMillis() - buoyHolder.longTouchStartTime > LONG_TOUCH_TIME) {
                         getParent().requestDisallowInterceptTouchEvent(true);
-                        startDragView(buoyHolder);
-                        return true;
+                        return startDragView(buoyHolder);
                     }
                 }
             } else {
@@ -244,7 +243,7 @@ public class DragViewGroup extends FrameLayout {
 
     HashSet<DragViewIF> scanList = new HashSet<>();
 
-    private void startDragView(BuoyHolder buoyHolder) {
+    private boolean startDragView(BuoyHolder buoyHolder) {
         Log.w(TAG, "startDragView: ");
         buoyHolder.draging = true;
         buoyHolder.dragVew = findDragVew(this, buoyHolder.downX, buoyHolder.downY);
@@ -278,7 +277,9 @@ public class DragViewGroup extends FrameLayout {
             for (DragViewGroupIF dragViewGroupIF : allDragVewGroup) {
                 dragViewGroupIF.onScan(scanList);
             }
+            return true;
         }
+        return false;
 
     }
 
