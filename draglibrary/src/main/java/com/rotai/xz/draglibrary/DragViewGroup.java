@@ -318,10 +318,10 @@ public class DragViewGroup extends FrameLayout {
         int childCount = viewGroup.getChildCount();
         for (int i = childCount - 1; i >= 0; i--) {
             View childAt = viewGroup.getChildAt(i);
-            int left = childAt.getLeft();
-            int right = childAt.getRight();
-            int top = childAt.getTop();
-            int bottom = childAt.getBottom();
+            int left = childAt.getLeft() - viewGroup.getScrollX();
+            int right = childAt.getRight() - viewGroup.getScrollX();
+            int top = childAt.getTop() - viewGroup.getScrollY();
+            int bottom = childAt.getBottom() - viewGroup.getScrollY();
             if (left <= x && right >= x && top <= y && bottom >= y) {
                 if (childAt instanceof ViewGroup) {
                     dragVew = findDragVew((ViewGroup) childAt, x - left, y - top);
@@ -347,10 +347,10 @@ public class DragViewGroup extends FrameLayout {
         int childCount = viewGroup.getChildCount();
         for (int i = childCount - 1; i >= 0; i--) {
             View childAt = viewGroup.getChildAt(i);
-            int left = childAt.getLeft();
-            int right = childAt.getRight();
-            int top = childAt.getTop();
-            int bottom = childAt.getBottom();
+            int left = childAt.getLeft() - viewGroup.getScrollX();
+            int right = childAt.getRight() - viewGroup.getScrollX();
+            int top = childAt.getTop() - viewGroup.getScrollY();
+            int bottom = childAt.getBottom() - viewGroup.getScrollY();
             if (left <= x && right >= x && top <= y && bottom >= y) {
                 if (childAt instanceof ViewGroup) {
                     dragVew = findDragVewGroup((ViewGroup) childAt, x - left, y - top);
